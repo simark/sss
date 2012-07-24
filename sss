@@ -1,0 +1,99 @@
+#!/bin/bash
+
+can_use_gui() {
+	test -x "/usr/bin/zenity"
+}
+
+get_name_gui() {
+	default_value=$1
+	basename=$(/usr/bin/zenity --entry --text="Enter filename base" --entry-text="$default_value")
+	return $?
+}
+
+can_get_name_console() {
+	test -z "$PS1"
+}
+
+get_name_console() {
+	default_value=$1
+	read -p "Enter filename base [$default_value]: " basename
+
+	if [ -z "$basename" ]; then
+		basename=$default_value
+	fi
+
+	return 0
+}
+
+show_url_gui() {
+	/usr/bin/zenity --info --text="$1" &
+}
+
+show_url_console() {
+	echo "$1"
+}
+
+put_url_in_clipboard() {
+	echo -n $1 | xsel -b
+}
+
+show_error_gui() {
+	/usr/bin/zenity --info --text="$1"
+}
+
+show_error_console() {
+	echo "$1"
+}
+
+user="simark"
+host="nova.polymtl.ca"
+dir="~/nova_html/ss"
+weburl="http://nova.polymtl.ca/~simark/ss"
+
+basename=$(basename $(tempfile))
+
+if can_use_gui; then
+	get_name_gui "$basename"
+	if [ $? -ne 0 ]; then
+		exit 1
+	fi
+elif can_get_name_console; then
+	get_name_console "$basename"
+	if [ $? -ne 0 ]; then
+		exit 1
+	fi
+else
+	exit 1
+fi
+
+filename="/tmp/${basename}.png"
+
+import "$filename"
+if [ $? -ne 0 ]; then
+	exit 1
+fi
+
+chmod 755 "$filename"
+scp -p  $filename $user@$host:$dir
+if [ $? -ne 0 ]; then
+	err="Error uploading the file."
+	if can_use_gui; then
+		show_error_gui "$err"
+	else
+		show_error_console "$err"
+	fi
+	rm $filename
+	exit 1
+fi
+
+rm $filename
+
+url="$weburl/$(basename $filename)"
+if can_use_gui; then
+	show_url_gui "$url"
+else
+	show_url_console "$url"
+fi
+
+put_url_in_clipboard "$url"
+
