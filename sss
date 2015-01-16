@@ -1,10 +1,5 @@
 #!/bin/bash
 
-user=""
-host=""
-dir=""
-weburl=""
-
 can_use_gui() {
 	test -x "/usr/bin/zenity"
 }
@@ -49,6 +44,11 @@ show_error_gui() {
 show_error_console() {
 	echo "$1"
 }
+
+user="simark"
+host="nova.polymtl.ca"
+dir="~/nova_html/ss"
+weburl="http://nova.polymtl.ca/~simark/ss"
 
 basename=$(basename $(tempfile))
 
