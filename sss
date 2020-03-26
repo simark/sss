@@ -50,7 +50,7 @@ host="nova.polymtl.ca"
 dir="~/nova_html/ss"
 weburl="http://nova.polymtl.ca/~simark/ss"
 
-basename=$(basename $(tempfile))
+basename=$(mktemp XXXXXXXX)
 
 if can_use_gui; then
 	get_name_gui "$basename"
